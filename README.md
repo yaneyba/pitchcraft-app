@@ -1,6 +1,6 @@
 # PitchCraft - AI-Powered Pitch Generation
 
-A modern React application that uses AI to generate compelling startup pitches, analyze them, and provide marketing suggestions.
+A modern React application that uses AI to generate compelling startup pitches, analyze them, and provide marketing suggestions. Built with a robust DataProvider architecture for scalable data management.
 
 ## 🚀 Features
 
@@ -8,8 +8,11 @@ A modern React application that uses AI to generate compelling startup pitches, 
 - **Multiple Pitch Styles**: Elevator pitches, investor decks, social media blurbs, and more
 - **Pitch Analysis**: Get feedback from an AI venture capitalist
 - **Marketing Suggestions**: Receive creative slogans and marketing angles
+- **User Dashboard**: View pitch history and manage credits
 - **Dark/Light Theme**: Toggle between themes with system preference detection
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
+- **Sticky Footer Layout**: Professional UI with proper footer positioning
+- **DataProvider Architecture**: Centralized data flow control with swappable implementations
 
 ## 🛠️ Tech Stack
 
@@ -17,7 +20,9 @@ A modern React application that uses AI to generate compelling startup pitches, 
 - **Build Tool**: Vite
 - **Styling**: Tailwind CSS
 - **AI API**: Google Gemini AI
-- **State Management**: React Hooks
+- **Architecture**: DataProvider pattern with Factory design
+- **State Management**: React Hooks + DataProvider abstraction
+- **Storage**: LocalStorage with Memory fallback
 
 ## 📁 Project Structure
 
@@ -30,17 +35,32 @@ pitchcraft-app/
 │   │   ├── LandingPage.tsx
 │   │   ├── ThemeToggle.tsx
 │   │   └── ...
+│   ├── providers/          # DataProvider architecture
+│   │   ├── factory/        # DataProvider factory
+│   │   │   └── DataProviderFactory.ts
+│   │   ├── implementations/  # Provider implementations
+│   │   │   ├── UserProvider.ts
+│   │   │   ├── PitchProvider.ts
+│   │   │   ├── CreditsProvider.ts
+│   │   │   ├── AIProvider.ts
+│   │   │   └── StorageProvider.ts
+│   │   ├── hooks/          # React hooks for providers
+│   │   │   ├── useDataProvider.ts
+│   │   │   └── useProviders.ts
+│   │   └── types/          # Provider type definitions
+│   │       └── index.ts
 │   ├── hooks/              # Custom React hooks
 │   │   └── useTheme.ts
 │   ├── types/              # TypeScript type definitions
 │   │   └── index.ts
 │   ├── utils/              # Utility functions
-│   │   ├── api.ts          # API calls
+│   │   ├── api.ts          # API calls with env variables
 │   │   └── helpers.ts      # Helper functions
 │   ├── App.tsx             # Main application component
 │   ├── main.tsx            # Application entry point
 │   └── index.css           # Global styles
 ├── public/                 # Static assets
+├── .env                    # Environment variables
 ├── index.html              # HTML template
 ├── package.json            # Dependencies and scripts
 ├── vite.config.ts          # Vite configuration
@@ -69,14 +89,14 @@ pitchcraft-app/
    npm install
    ```
 
-3. **Set up API Key**
-   - Open `src/utils/api.ts`
-   - Replace the empty `apiKey` string with your actual Gemini API key:
-   ```typescript
-   const apiKey = "YOUR_ACTUAL_API_KEY_HERE";
+3. **Set up environment variables**
+   Create a `.env` file in the root directory:
+   ```env
+   VITE_GEMINI_API_KEY=your_actual_api_key_here
+   VITE_GEMINI_API_URL=https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent
    ```
    
-   > **Note**: For production, use environment variables instead of hardcoding the API key.
+   > **Security**: Never commit your `.env` file to version control. The API key is automatically loaded from environment variables.
 
 4. **Start the development server**
    ```bash
@@ -110,18 +130,29 @@ npm run preview
 
 ## 🔧 Configuration
 
-### API Configuration
+### Environment Variables
 
-Update the API key in `src/utils/api.ts`:
+The app uses environment variables for secure configuration. Create a `.env` file in the root:
+
+```env
+# Required: Your Google Gemini AI API key
+VITE_GEMINI_API_KEY=your_actual_api_key_here
+
+# Optional: Custom Gemini API endpoint (defaults to Google's endpoint)
+VITE_GEMINI_API_URL=https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent
+```
+
+### DataProvider Configuration
+
+The app uses a DataProvider architecture for flexible data management. Providers can be configured in `DataProviderFactory`:
 
 ```typescript
-const apiKey = process.env.VITE_GEMINI_API_KEY || "YOUR_API_KEY_HERE";
-```
-
-For environment variables, create a `.env` file:
-
-```
-VITE_GEMINI_API_KEY=your_actual_api_key_here
+// Example: Switch between different provider implementations
+const config = {
+  storage: 'localStorage',  // or 'memory', 'api'
+  ai: 'gemini',           // AI service provider
+  environment: 'development' // or 'production', 'testing'
+};
 ```
 
 ### Theme Configuration
@@ -138,15 +169,32 @@ theme: {
 }
 ```
 
-## 🧩 Component Architecture
+## 🧩 Architecture Overview
 
-The app follows a modular component architecture:
+### DataProvider Pattern
 
-- **App.tsx**: Main container with state management
-- **Components**: Reusable UI components
+The app implements a DataProvider architecture for centralized data management:
+
+- **DataProviderFactory**: Creates and configures provider instances
+- **Provider Implementations**: Separate providers for User, Pitch, Credits, AI, and Storage
+- **React Integration**: Custom hooks (`useDataProvider`, `useProviders`) for component integration
+- **Flexible Configuration**: Easily switch between Local/Memory/API storage modes
+
+### Component Architecture
+
+- **App.tsx**: Main container with sticky footer layout
+- **Components**: Modular, reusable UI components
 - **Hooks**: Custom React hooks for shared logic
-- **Utils**: API calls and helper functions
-- **Types**: TypeScript interfaces and types
+- **Providers**: Data abstraction layer with multiple implementations
+- **Utils**: API calls with environment variable configuration
+- **Types**: Comprehensive TypeScript interfaces
+
+### Key Benefits
+
+- **Separation of Concerns**: Business logic separated from UI components
+- **Testability**: Mock providers available for testing
+- **Scalability**: Easy to add new data sources or providers
+- **Configuration-Driven**: Switch implementations without code changes
 
 ## 📝 Available Scripts
 
@@ -169,12 +217,24 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔮 Future Enhancements
 
-- [ ] User authentication and persistent storage
+- [ ] Database integration via DataProvider architecture
+- [ ] Real-time collaboration features
+- [ ] Advanced pitch analytics and A/B testing
+- [ ] Multi-language AI support
+- [ ] Team workspaces and permissions
+- [ ] Export pitches to PDF/PowerPoint/Figma
 - [ ] Payment integration for credit purchases
-- [ ] Pitch templates and customization
-- [ ] Export pitches to PDF/PowerPoint
-- [ ] Team collaboration features
-- [ ] Analytics and pitch performance tracking
+- [ ] Pitch performance tracking and optimization
+- [ ] Custom AI model training
+- [ ] Pitch template marketplace
+
+### Architectural Roadmap
+
+- [ ] Database Provider implementation (PostgreSQL/MongoDB)
+- [ ] Caching layer with Redis Provider
+- [ ] Offline-first architecture with sync capabilities
+- [ ] GraphQL Provider for API optimization
+- [ ] WebSocket Provider for real-time features
 
 ## 🆘 Troubleshooting
 
@@ -182,9 +242,19 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Build errors with TypeScript**: Make sure all dependencies are installed and TypeScript version is compatible.
 
-**API errors**: Verify your Gemini API key is valid and has sufficient quota.
+**API errors**: 
+- Verify your Gemini API key is set in the `.env` file
+- Check that `VITE_GEMINI_API_KEY` environment variable is accessible
+- Ensure API key has sufficient quota
 
 **Styling issues**: Ensure PostCSS and Tailwind CSS are properly configured.
+
+**DataProvider errors**: 
+- Check provider configuration in `DataProviderFactory`
+- Verify localStorage is available in your browser
+- Use Memory providers as fallback for testing
+
+**Footer not sticking**: The layout uses flexbox with `min-h-screen` - ensure parent containers maintain proper flex structure.
 
 ## 📞 Support
 
@@ -192,27 +262,46 @@ For support, please open an issue on GitHub or contact [your-email@example.com].
 
 ---
 
-Made with ❤️ using React, TypeScript, and Gemini AI
+Made with ❤️ using React, TypeScript, Gemini AI, and modern architecture patterns
 
-✨ Key Features
-AI-Powered Pitch Generation: Creates high-quality pitches in various styles (Elevator, Investor, Social Media, etc.).
+## ✨ Key Features
 
-AI Pitch Analysis: Get feedback on your generated pitch from a simulated AI Venture Capitalist.
+**AI-Powered Pitch Generation**: Creates high-quality pitches in various styles (Elevator, Investor, Social Media, etc.).
 
-AI Marketing Angles: Brainstorm catchy slogans and marketing strategies for your app.
+**AI Pitch Analysis**: Get feedback on your generated pitch from a simulated AI Venture Capitalist.
 
-User Dashboard: View your credit balance and a history of all generated pitches.
+**AI Marketing Angles**: Brainstorm catchy slogans and marketing strategies for your app.
 
-Light & Dark Modes: A sleek, theme-able UI for user comfort.
+**User Dashboard**: View your credit balance and a history of all generated pitches.
 
-Fully Mobile-Responsive: Looks and works great on any device.
+**Light & Dark Modes**: A sleek, theme-able UI for user comfort with system preference detection.
 
-🛠️ Tech Stack
-Frontend: React with TypeScript
+**Fully Mobile-Responsive**: Looks and works great on any device with sticky footer layout.
 
-Styling: Tailwind CSS
+**DataProvider Architecture**: Scalable data management with swappable implementations for easy testing and development.
 
-AI: Google Gemini API
+## 🛠️ Tech Stack
 
-🏃‍♀️ Running Locally
-(Instructions to be added)
+**Frontend**: React 18 with TypeScript  
+**Build Tool**: Vite with environment variable support  
+**Styling**: Tailwind CSS with responsive design  
+**AI Integration**: Google Gemini API with secure configuration  
+**Architecture**: DataProvider pattern with Factory design  
+**Storage**: Multi-tier storage with LocalStorage/Memory fallback  
+
+## 🚀 Quick Start
+
+```bash
+# Clone and install
+git clone <your-repo-url>
+cd pitchcraft-app
+npm install
+
+# Set up environment
+echo "VITE_GEMINI_API_KEY=your_api_key_here" > .env
+
+# Start development
+npm run dev
+```
+
+Open http://localhost:5173 to view the application.
