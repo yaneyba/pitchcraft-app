@@ -1,14 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, GeneratedPitch } from './types';
-import { useTheme } from './hooks/useTheme';
 import { generatePitch, analyzePitch, generateMarketingSuggestions } from './utils/api';
 
 import Header from './components/Header';
 import Footer from './components/Footer';
 import LandingPage from './components/LandingPage';
-// Note: Other components will be added as they're created
+import PitchForm from './components/PitchForm';
+import PitchResult from './components/PitchResult';
+import PitchAnalysis from './components/PitchAnalysis';
+import MarketingSuggestions from './components/MarketingSuggestions';
+import Dashboard from './components/Dashboard';
+import ViewPitchModal from './components/ViewPitchModal';
+import ApiError from './components/ApiError';
 
-function App() {
+export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [credits, setCredits] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -21,8 +26,34 @@ function App() {
   const [activeView, setActiveView] = useState<string>('generator');
   const [error, setError] = useState<string | null>(null);
   const [selectedPitch, setSelectedPitch] = useState<GeneratedPitch | null>(null);
-  
-  const { theme, toggleTheme } = useTheme();
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+
+  // Effect to set theme from localStorage on initial load
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('pitchcraft-theme') as 'light' | 'dark' | null;
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (savedTheme) {
+      setTheme(savedTheme);
+    } else if (prefersDark) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+  }, []);
+
+  // Effect to apply theme class and save to localStorage
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('pitchcraft-theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+  };
 
   const handleLogin = () => {
     setUser({ name: 'Demo User' });
@@ -36,7 +67,6 @@ function App() {
     setPitchAnalysis(null);
     setMarketingSuggestions(null);
     setActiveView('generator');
-    setPitchHistory([]);
   };
 
   const handleGeneratePitch = async (input: string, style: string) => {
@@ -114,60 +144,51 @@ function App() {
         {!user ? (
           <LandingPage onLogin={handleLogin} />
         ) : (
-          <div>
-            {/* Navigation tabs would go here */}
+          <>
             <div className="flex space-x-4 mb-8 relative z-10">
-              <button 
-                onClick={() => setActiveView('generator')} 
-                className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
-                  activeView === 'generator' 
-                    ? 'bg-indigo-600 text-white' 
-                    : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-                }`}
-              >
+              <button onClick={() => setActiveView('generator')} className={`px-6 py-2 rounded-lg font-semibold transition-colors ${activeView === 'generator' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}`}>
                 Pitch Generator
               </button>
-              <button 
-                onClick={() => setActiveView('dashboard')} 
-                className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
-                  activeView === 'dashboard' 
-                    ? 'bg-indigo-600 text-white' 
-                    : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-                }`}
-              >
+              <button onClick={() => setActiveView('dashboard')} className={`px-6 py-2 rounded-lg font-semibold transition-colors ${activeView === 'dashboard' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}`}>
                 Dashboard
               </button>
             </div>
             
-            {error && (
-              <div className="bg-red-100 dark:bg-red-900/50 border border-red-500 text-red-700 dark:text-red-300 p-4 rounded-lg w-full max-w-2xl mt-4 text-center">
-                <p><strong>Oops! Something went wrong.</strong></p>
-                <p className="text-sm">{error}</p>
-              </div>
-            )}
-            
+            {error && <ApiError message={error} />}
+
             {activeView === 'generator' ? (
-              <div>
-                {/* PitchForm component would go here */}
-                <div className="text-center">
-                  <p>Pitch Generator will be implemented with remaining components</p>
-                </div>
-              </div>
+              <>
+                <PitchForm credits={credits} onGenerate={handleGeneratePitch} isLoading={isLoading} />
+                {generatedPitch && (
+                  <PitchResult 
+                    pitch={generatedPitch.pitch} 
+                    style={generatedPitch.style} 
+                    originalInput={generatedPitch.input}
+                    onAnalyze={handleAnalyzePitch} 
+                    isAnalyzing={isAnalyzing} 
+                    onSuggestMarketing={handleSuggestMarketing}
+                    isSuggestingMarketing={isSuggestingMarketing}
+                    credits={credits}
+                  />
+                )}
+                {pitchAnalysis && <PitchAnalysis analysis={pitchAnalysis} />}
+                {marketingSuggestions && <MarketingSuggestions suggestions={marketingSuggestions} />}
+              </>
             ) : (
-              <div>
-                {/* Dashboard component would go here */}
-                <div className="text-center">
-                  <p>Dashboard will be implemented with remaining components</p>
-                </div>
-              </div>
+              <Dashboard 
+                user={user}
+                credits={credits} 
+                history={pitchHistory} 
+                onBuyCredits={addCredits}
+                onViewPitch={(pitch) => setSelectedPitch(pitch)}
+              />
             )}
-          </div>
+          </>
         )}
       </main>
       
+      <ViewPitchModal pitch={selectedPitch} onClose={() => setSelectedPitch(null)} />
       <Footer />
     </div>
   );
 }
-
-export default App;

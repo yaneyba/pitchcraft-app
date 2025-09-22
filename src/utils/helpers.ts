@@ -36,7 +36,9 @@ export const PITCH_STYLES = [
   "Casual Social Media Blurb",
   "Feature-Focused",
   "Benefit-Driven"
-] as const;
+];
+
+export type PitchStyle = typeof PITCH_STYLES[number];
 
 /**
  * Formats analysis or suggestions text with basic markdown parsing
