@@ -7,12 +7,17 @@
  */
 export const callGeminiApi = async (systemPrompt: string, userQuery: string): Promise<string> => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
+  const baseUrl = import.meta.env.VITE_GEMINI_API_URL || "";
   
   if (!apiKey) {
     throw new Error("Gemini API key is not configured. Please set VITE_GEMINI_API_KEY in your environment variables.");
   }
   
-  const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+  if (!baseUrl) {
+    throw new Error("Gemini API URL is not configured. Please set VITE_GEMINI_API_URL in your environment variables.");
+  }
+  
+  const apiUrl = `${baseUrl}?key=${apiKey}`;
 
   const payload = {
     contents: [{ parts: [{ text: userQuery }] }],
