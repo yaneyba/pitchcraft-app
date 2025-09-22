@@ -3,9 +3,12 @@ export interface User {
 }
 
 export interface GeneratedPitch {
+  id?: string;
   input: string;
   style: string;
   pitch: string;
+  createdAt?: string;
+  userId?: string;
 }
 
 export type Theme = 'light' | 'dark';
