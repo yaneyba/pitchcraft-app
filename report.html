@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PitchCraft AI | Interactive Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: A thematic, single-page scrollable layout designed as an interactive product tour. The structure guides the user from a high-level introduction (Hero) to a detailed, interactive explanation of the core workflow, followed by a deep-dive into the AI features, a visual mockup of the dashboard, and a summary of the technology. This top-down, narrative structure was chosen because the source report is descriptive, not data-driven; the goal is to explain a process and showcase features in the most engaging way possible, making a linear, story-like flow more intuitive for the user than a dashboard. -->
+    <!-- Visualization & Content Choices: The report's core is the app's workflow. Goal: Organize/Explain. Method: An interactive flowchart built with HTML/CSS/JS. Interaction: Users click each step to reveal detailed explanations, promoting active learning. Justification: This is far more engaging than a static list. For features (Goal: Inform), styled cards are used for clarity. For the dashboard (Goal: Engage), an animated stats section adds a dynamic "wow" factor. All visuals are built with HTML/CSS/JS, avoiding SVG/Mermaid. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF8;
+            color: #333;
+        }
+        .active-step {
+            transform: scale(1.05);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.5);
+            border-color: #6366F1;
+        }
+        .step-arrow {
+            font-size: 2rem;
+            color: #D1D5DB;
+        }
+        .card-hover-effect {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-hover-effect:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="app" class="container mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Header -->
+        <header class="py-8 text-center">
+            <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight">
+                <span class="text-indigo-600">PitchCraft AI:</span> An Interactive Overview
+            </h1>
+            <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
+                This interactive application breaks down the features and workflow of the PitchCraft AI platform, as detailed in the project report. Explore how an idea is transformed into a powerful pitch.
+            </p>
+        </header>
+
+        <!-- Section 1: Interactive Workflow -->
+        <section id="workflow" class="py-12 md:py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold">The Pitch Generation Journey</h2>
+                <p class="mt-2 text-md text-gray-500 max-w-2xl mx-auto">
+                    The core of PitchCraft is a seamless four-step process. Click on each step below to see how the AI assists founders at every stage, from initial input to receiving actionable marketing advice.
+                </p>
+            </div>
+            
+            <div class="flex flex-col lg:flex-row items-center justify-center gap-4 md:gap-6 lg:gap-8">
+                <!-- Step 1 -->
+                <div id="step-1" class="workflow-step cursor-pointer p-6 bg-white rounded-xl border-2 border-gray-200 transition-all duration-300 w-full md:w-48 text-center">
+                    <div class="text-3xl mb-2">①</div>
+                    <h3 class="font-bold">Provide Input</h3>
+                </div>
+                <div class="step-arrow hidden lg:block">→</div>
+
+                <!-- Step 2 -->
+                <div id="step-2" class="workflow-step cursor-pointer p-6 bg-white rounded-xl border-2 border-gray-200 transition-all duration-300 w-full md:w-48 text-center">
+                    <div class="text-3xl mb-2">②</div>
+                    <h3 class="font-bold">Choose Style</h3>
+                </div>
+                <div class="step-arrow hidden lg:block">→</div>
+
+                <!-- Step 3 -->
+                <div id="step-3" class="workflow-step cursor-pointer p-6 bg-white rounded-xl border-2 border-gray-200 transition-all duration-300 w-full md:w-48 text-center">
+                    <div class="text-3xl mb-2">③</div>
+                    <h3 class="font-bold">Generate Pitch</h3>
+                </div>
+                <div class="step-arrow hidden lg:block">→</div>
+
+                <!-- Step 4 -->
+                <div id="step-4" class="workflow-step cursor-pointer p-6 bg-white rounded-xl border-2 border-gray-200 transition-all duration-300 w-full md:w-48 text-center">
+                    <div class="text-3xl mb-2">④</div>
+                    <h3 class="font-bold">Analyze & Refine</h3>
+                </div>
+            </div>
+
+            <!-- Details Panel -->
+            <div id="workflow-details" class="mt-12 bg-indigo-50 p-8 rounded-2xl min-h-[180px] flex items-center justify-center transition-opacity duration-500">
+                <p class="text-center text-indigo-800 font-medium">Click a step above to see the details.</p>
+            </div>
+        </section>
+
+        <!-- Section 2: AI Feature Deep Dive -->
+        <section id="features" class="py-12 md:py-16 bg-gray-50 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+             <div class="text-center mb-12 max-w-3xl mx-auto">
+                <h2 class="text-3xl font-bold">Powered by Gemini AI</h2>
+                <p class="mt-2 text-md text-gray-500">
+                    PitchCraft utilizes three specialized AI functions to provide comprehensive support. Each feature is designed to address a critical aspect of the pitching process, ensuring a well-rounded and effective final product.
+                </p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Card 1: Pitch Generation -->
+                <div class="bg-white p-8 rounded-xl border border-gray-200 card-hover-effect">
+                    <h3 class="text-xl font-bold mb-2 text-indigo-600">Pitch Generation</h3>
+                    <p class="text-gray-600">Creates high-quality, persuasive pitches in various styles including Elevator, Investor, Social Media, and more. The AI adapts its tone and structure to perfectly match the chosen format.</p>
+                </div>
+                <!-- Card 2: Pitch Analysis -->
+                <div class="bg-white p-8 rounded-xl border border-gray-200 card-hover-effect">
+                    <h3 class="text-xl font-bold mb-2 text-teal-600">Pitch Analysis</h3>
+                    <p class="text-gray-600">A simulated AI Venture Capitalist analyzes the generated pitch, providing structured feedback on its strengths, weaknesses, and areas for improvement, helping users refine their message.</p>
+                </div>
+                <!-- Card 3: Marketing Angles -->
+                <div class="bg-white p-8 rounded-xl border border-gray-200 card-hover-effect">
+                    <h3 class="text-xl font-bold mb-2 text-amber-600">Marketing Angles</h3>
+                    <p class="text-gray-600">Brainstorms catchy slogans and unique marketing strategies tailored to the user's app. This feature provides actionable ideas to kickstart a go-to-market plan.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Dashboard & User Experience -->
+        <section id="dashboard" class="py-12 md:py-16">
+            <div class="text-center mb-12 max-w-3xl mx-auto">
+                <h2 class="text-3xl font-bold">The Founder's Dashboard</h2>
+                <p class="mt-2 text-md text-gray-500">
+                    The user dashboard is the central hub for managing activity. It provides an at-a-glance view of key metrics and a complete history of all generated content, ensuring founders can track their progress and access past work easily.
+                </p>
+            </div>
+            <div class="bg-white p-8 rounded-2xl border border-gray-200 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div class="bg-indigo-50 p-6 rounded-xl">
+                    <p id="stat-credits" class="text-5xl font-bold text-indigo-600">0</p>
+                    <p class="text-lg font-medium text-indigo-800 mt-2">Credits Remaining</p>
+                </div>
+                <div class="bg-teal-50 p-6 rounded-xl">
+                    <p id="stat-pitches" class="text-5xl font-bold text-teal-600">0</p>
+                    <p class="text-lg font-medium text-teal-800 mt-2">Pitches Generated</p>
+                </div>
+                <div class="bg-gray-100 p-6 rounded-xl flex flex-col items-center justify-center">
+                     <p class="text-2xl font-bold text-gray-700">Light & Dark Modes</p>
+                     <p class="text-md text-gray-500 mt-1">Themeable UI for user comfort</p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const workflowSteps = document.querySelectorAll('.workflow-step');
+            const detailsPanel = document.getElementById('workflow-details');
+            
+            const workflowData = {
+                'step-1': {
+                    title: 'Provide Input',
+                    description: 'The user begins by providing the source material for their pitch. This can be a direct URL to their live application or a detailed text description of their startup idea, core features, and target audience.'
+                },
+                'step-2': {
+                    title: 'Choose Style',
+                    description: 'Next, the user selects from a variety of professional pitch styles. Options like "Elevator Pitch," "Formal Investor Deck," and "Casual Social Media Blurb" allow the AI to tailor the tone, length, and format to a specific audience.'
+                },
+                'step-3': {
+                    title: 'Generate Pitch',
+                    description: 'With a single click, the Gemini API processes the input and the chosen style. It generates a complete, persuasive pitch that highlights the unique value proposition and key selling points of the application.'
+                },
+                'step-4': {
+                    title: 'Analyze & Refine',
+                    description: 'After generation, the user can leverage further AI capabilities. They can request a "VC Analysis" for feedback or ask for "Marketing Angles" to get slogans and strategies, using credits to refine and expand on the initial pitch.'
+                }
+            };
+
+            function updateDetailsPanel(stepId) {
+                const data = workflowData[stepId];
+                if (!data) return;
+
+                detailsPanel.style.opacity = 0;
+                setTimeout(() => {
+                    detailsPanel.innerHTML = `
+                        <div class="text-center">
+                            <h3 class="text-xl font-bold text-indigo-900">${data.title}</h3>
+                            <p class="mt-2 text-indigo-700 max-w-2xl mx-auto">${data.description}</p>
+                        </div>
+                    `;
+                    detailsPanel.style.opacity = 1;
+                }, 300);
+            }
+
+            workflowSteps.forEach(step => {
+                step.addEventListener('click', () => {
+                    workflowSteps.forEach(s => s.classList.remove('active-step'));
+                    step.classList.add('active-step');
+                    updateDetailsPanel(step.id);
+                });
+            });
+
+            // Animated Stats Counter
+            function animateValue(obj, start, end, duration) {
+                let startTimestamp = null;
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    obj.innerHTML = Math.floor(progress * (end - start) + start);
+                    if (progress < 1) {
+                        window.requestAnimationFrame(step);
+                    }
+                };
+                window.requestAnimationFrame(step);
+            }
+
+            const dashboardSection = document.getElementById('dashboard');
+            const creditsStat = document.getElementById('stat-credits');
+            const pitchesStat = document.getElementById('stat-pitches');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        animateValue(creditsStat, 0, 5, 1500);
+                        animateValue(pitchesStat, 0, 12, 1500);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            if(dashboardSection) {
+                observer.observe(dashboardSection);
+            }
+        });
+    </script>
+</body>
+</html>
