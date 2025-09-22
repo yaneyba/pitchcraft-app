@@ -128,7 +128,7 @@ export default function App() {
   };
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen text-gray-800 dark:text-white font-sans transition-colors duration-300">
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen text-gray-800 dark:text-white font-sans transition-colors duration-300 flex flex-col">
       <div className="absolute top-0 left-0 w-full h-full bg-cover bg-center opacity-10" style={{backgroundImage: "url('https://www.transparenttextures.com/patterns/cubes.png')"}}></div>
       
       <Header 
@@ -140,7 +140,7 @@ export default function App() {
         toggleTheme={toggleTheme} 
       />
       
-      <main className="container mx-auto pt-24 pb-12 px-4 flex flex-col items-center justify-center">
+      <main className="container mx-auto pt-24 pb-12 px-4 flex flex-col items-center justify-center flex-grow">
         {!user ? (
           <LandingPage onLogin={handleLogin} />
         ) : (

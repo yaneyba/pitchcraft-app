@@ -1,7 +1,7 @@
 import React from 'react';
 
 const Footer: React.FC = () => (
-  <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700/50 mt-16">
+  <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700/50 mt-auto">
     <div className="container mx-auto py-6 px-4 flex flex-col sm:flex-row justify-between items-center text-center sm:text-left">
       <p className="text-gray-500 dark:text-gray-400 text-sm mb-4 sm:mb-0">
         &copy; 2025 PitchCraft. All rights reserved.
