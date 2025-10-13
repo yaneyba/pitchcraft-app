@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { User, GeneratedPitch } from './types';
 import { generatePitch, analyzePitch, generateMarketingSuggestions } from './utils/api';
 
