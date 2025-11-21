@@ -5,7 +5,7 @@
  * @returns Promise<string> The generated response from Gemini
  * @throws Error if the API call fails
  */
-export const callGeminiApi = async (systemPrompt: string, userQuery: string): Promise<string> => {
+export const callGeminiApi = async (systemPrompt: string, userQuery: string, tools?: any[]): Promise<string> => {
   let apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
   
   // Strict cleaning: Remove anything that isn't a valid API key character (alphanumeric, -, _)
@@ -30,12 +30,16 @@ export const callGeminiApi = async (systemPrompt: string, userQuery: string): Pr
   
   const apiUrl = `${baseUrl}?key=${apiKey}`;
 
-  const payload = {
+  const payload: any = {
     contents: [{ parts: [{ text: userQuery }] }],
     systemInstruction: {
       parts: [{ text: systemPrompt }]
     },
   };
+
+  if (tools) {
+    payload.tools = tools;
+  }
 
   try {
     const response = await fetch(apiUrl, {
@@ -68,10 +72,14 @@ export const callGeminiApi = async (systemPrompt: string, userQuery: string): Pr
  * Generates a pitch using the Gemini API
  */
 export const generatePitch = async (input: string, style: string): Promise<string> => {
-  const systemPrompt = "You are PitchCraft AI, a professional startup copywriter and marketing expert. Your goal is to generate a compelling, concise, and persuasive pitch based on the user's input. Adapt your tone and structure perfectly to the requested pitch style.";
+  const systemPrompt = "You are PitchCraft AI, a professional startup copywriter and marketing expert. Your goal is to generate a compelling, concise, and persuasive pitch based on the user's input. Adapt your tone and structure perfectly to the requested pitch style. If the user provides a URL, use the Google Search tool to visit the page and extract relevant context to inform your pitch.";
   const userQuery = `Generate a "${style}" pitch for the following app: [${input}]. Focus on its unique value proposition, core features, and target audience.`;
   
-  return callGeminiApi(systemPrompt, userQuery);
+  // Check if input contains a URL
+  const hasUrl = /https?:\/\/[^\s]+/.test(input);
+  const tools = hasUrl ? [{ google_search: {} }] : undefined;
+
+  return callGeminiApi(systemPrompt, userQuery, tools);
 };
 
 /**
