@@ -6,8 +6,19 @@
  * @throws Error if the API call fails
  */
 export const callGeminiApi = async (systemPrompt: string, userQuery: string): Promise<string> => {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
-  const baseUrl = import.meta.env.VITE_GEMINI_API_URL || "";
+  let apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
+  
+  // Strict cleaning: Remove anything that isn't a valid API key character (alphanumeric, -, _)
+  // This handles invisible spaces, newlines, and copy-paste artifacts like :1
+  apiKey = apiKey.replace(/[^a-zA-Z0-9_\-]/g, '');
+
+  if (apiKey.length < 30) {
+    console.warn("Warning: API Key seems too short. Please check VITE_GEMINI_API_KEY in .env");
+  }
+
+  console.log(`Using Gemini API Key: ${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)} (Length: ${apiKey.length})`);
+  let baseUrl = import.meta.env.VITE_GEMINI_API_URL || "";
+  baseUrl = baseUrl.trim();
   
   if (!apiKey) {
     throw new Error("Gemini API key is not configured. Please set VITE_GEMINI_API_KEY in your environment variables.");
@@ -35,6 +46,7 @@ export const callGeminiApi = async (systemPrompt: string, userQuery: string): Pr
 
     if (!response.ok) {
       const errorData = await response.json();
+      console.error('Full Gemini API Error Response:', JSON.stringify(errorData, null, 2));
       throw new Error(errorData.error?.message || `API Error: ${response.status}`);
     }
 
