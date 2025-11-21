@@ -72,15 +72,29 @@ export const callGeminiApi = async (systemPrompt: string, userQuery: string, too
  * Generates a pitch using the Gemini API
  */
 export const generatePitch = async (input: string, style: string): Promise<string> => {
+  // Check if input contains a URL
+  const urlMatch = input.match(/https?:\/\/[^\s]+/);
+  const hasUrl = !!urlMatch;
+  
   const systemPrompt = `You are PitchCraft AI, a professional startup copywriter and marketing expert. Generate a compelling, concise, and persuasive pitch based on the user's input. Adapt your tone and structure perfectly to the requested pitch style.
 
-IMPORTANT: Do not explain what you are going to do. Do not describe your process. Simply generate the pitch directly. If a URL is provided, research it first, then write the pitch based on what you learned.`;
-  
-  const userQuery = `Generate a "${style}" pitch for the following app: [${input}]. Focus on its unique value proposition, core features, and target audience.`;
-  
-  // Check if input contains a URL
-  const hasUrl = /https?:\/\/[^\s]+/.test(input);
-  const tools = hasUrl ? [{ google_search: {} }] : undefined;
+IMPORTANT: Do not explain what you are going to do. Do not describe your process. Simply generate the pitch directly. Base your pitch ONLY on factual information from search results.`;
+
+  let userQuery: string;
+  let tools: any[] | undefined;
+
+  if (hasUrl) {
+    const url = urlMatch![0];
+    
+    // Use Google Search with the full URL to get accurate information
+    userQuery = `Search for "${url}" and find out what this website is about. Then generate a "${style}" pitch based on the actual information you find about this specific website. The pitch must accurately reflect what ${url} actually does.`;
+    
+    tools = [{
+      googleSearch: {}
+    }];
+  } else {
+    userQuery = `Generate a "${style}" pitch for the following app: [${input}]. Focus on its unique value proposition, core features, and target audience.`;
+  }
 
   return callGeminiApi(systemPrompt, userQuery, tools);
 };
