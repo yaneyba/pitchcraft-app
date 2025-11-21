@@ -1,5 +1,5 @@
 import React from 'react';
-import { ThemeToggleProps } from '../types';
+import { ThemeToggleProps } from '../../domain/types';
 
 const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, toggleTheme }) => (
   <button

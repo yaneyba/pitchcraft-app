@@ -1,5 +1,5 @@
 import React from 'react';
-import { LandingPageProps } from '../types';
+import { LandingPageProps } from '../../domain/types';
 
 const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => (
   <div className="w-full animate-fade-in">

@@ -1,5 +1,5 @@
 import React from 'react';
-import { PitchResultProps } from '../types';
+import { PitchResultProps } from '../../domain/types';
 
 const PitchResult: React.FC<PitchResultProps> = ({ 
   pitch, 

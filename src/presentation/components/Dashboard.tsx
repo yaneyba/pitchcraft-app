@@ -1,5 +1,5 @@
 import React from 'react';
-import { DashboardProps } from '../types';
+import { DashboardProps } from '../../domain/types';
 
 const Dashboard: React.FC<DashboardProps> = ({ user, credits, history, onBuyCredits, onViewPitch }) => (
   <div className="w-full max-w-6xl p-4 sm:p-8 bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl animate-fade-in">

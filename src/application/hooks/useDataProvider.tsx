@@ -1,5 +1,5 @@
 import React, { createContext, useContext, ReactNode } from 'react';
-import { DataProvider } from '../DataProviderFactory';
+import { DataProvider } from '../../domain/providers/DataProviderFactory';
 
 const DataProviderContext = createContext<DataProvider | null>(null);
 

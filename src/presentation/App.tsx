@@ -1,13 +1,7 @@
-/**
- * Example of how to integrate DataProviderFactory into the existing App component
- * This demonstrates how to refactor the current state management to use the data providers
- */
-
 import { useState, useEffect } from 'react';
-import { User, GeneratedPitch } from './types';
-import { DataProviderFactory } from './providers';
+import { User, GeneratedPitch } from '../domain/types';
+import { useDataProvider } from '../application/hooks/useDataProvider';
 
-// Import existing components
 import Header from './components/Header';
 import Footer from './components/Footer';
 import LandingPage from './components/LandingPage';
@@ -19,11 +13,8 @@ import Dashboard from './components/Dashboard';
 import ViewPitchModal from './components/ViewPitchModal';
 import ApiError from './components/ApiError';
 
-export default function AppWithDataProvider() {
-  // Initialize data provider
-  const dataProvider = DataProviderFactory.getInstance();
-
-  // State management (can be gradually migrated to providers)
+export default function App() {
+  const provider = useDataProvider();
   const [user, setUser] = useState<User | null>(null);
   const [credits, setCredits] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -38,32 +29,23 @@ export default function AppWithDataProvider() {
   const [selectedPitch, setSelectedPitch] = useState<GeneratedPitch | null>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
 
-  // Load initial data on component mount
+  // Load initial data
   useEffect(() => {
-    loadInitialData();
-  }, []);
+    const loadData = async () => {
+      const currentUser = await provider.user.getCurrentUser();
+      setUser(currentUser);
 
-  const loadInitialData = async () => {
-    try {
-      // Load user data
-      const currentUser = await dataProvider.user.getCurrentUser();
       if (currentUser) {
-        setUser(currentUser);
-        
-        // Load user's credits
-        const userCredits = await dataProvider.credits.getCredits(currentUser.name);
+        const userCredits = await provider.credits.getCredits(currentUser.name);
         setCredits(userCredits);
-        
-        // Load pitch history
-        const history = await dataProvider.pitch.getPitchHistory(currentUser.name);
+        const history = await provider.pitch.getPitchHistory(currentUser.name);
         setPitchHistory(history);
       }
-    } catch (err: any) {
-      console.error('Failed to load initial data:', err);
-    }
-  };
+    };
+    loadData();
+  }, [provider]);
 
-  // Theme management (unchanged)
+  // Effect to set theme from localStorage on initial load
   useEffect(() => {
     const savedTheme = localStorage.getItem('pitchcraft-theme') as 'light' | 'dark' | null;
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -76,6 +58,7 @@ export default function AppWithDataProvider() {
     }
   }, []);
 
+  // Effect to apply theme class and save to localStorage
   useEffect(() => {
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
@@ -89,38 +72,26 @@ export default function AppWithDataProvider() {
     setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
   };
 
-  // User management using DataProvider
   const handleLogin = async () => {
-    try {
-      const user = await dataProvider.user.loginUser({ name: 'Demo User' });
-      setUser(user);
-      
-      const userCredits = await dataProvider.credits.getCredits(user.name);
-      setCredits(userCredits);
-      
-      const history = await dataProvider.pitch.getPitchHistory(user.name);
-      setPitchHistory(history);
-    } catch (err: any) {
-      setError(err.message || 'Failed to login');
-    }
+    const newUser = await provider.user.loginUser({ name: 'Demo User' });
+    setUser(newUser);
+    const userCredits = await provider.credits.getCredits(newUser.name);
+    setCredits(userCredits);
+    const history = await provider.pitch.getPitchHistory(newUser.name);
+    setPitchHistory(history);
   };
 
   const handleLogout = async () => {
-    try {
-      await dataProvider.user.logoutUser();
-      setUser(null);
-      setCredits(0);
-      setPitchHistory([]);
-      setGeneratedPitch(null);
-      setPitchAnalysis(null);
-      setMarketingSuggestions(null);
-      setActiveView('generator');
-    } catch (err: any) {
-      setError(err.message || 'Failed to logout');
-    }
+    await provider.user.logoutUser();
+    setUser(null);
+    setCredits(0);
+    setGeneratedPitch(null);
+    setPitchAnalysis(null);
+    setMarketingSuggestions(null);
+    setPitchHistory([]);
+    setActiveView('generator');
   };
 
-  // Pitch generation using DataProvider
   const handleGeneratePitch = async (input: string, style: string) => {
     if (!user) return;
     
@@ -131,21 +102,31 @@ export default function AppWithDataProvider() {
     setMarketingSuggestions(null);
 
     try {
-      // Generate pitch using AI provider
-      const pitchText = await dataProvider.ai.generatePitch(input, style);
+      // Check credits first
+      const currentCredits = await provider.credits.getCredits(user.name);
+      if (currentCredits < 1) {
+        throw new Error('Insufficient credits');
+      }
+
+      const pitchText = await provider.ai.generatePitch(input, style);
       
-      // Create pitch object
-      const newPitch: GeneratedPitch = { input, style, pitch: pitchText };
+      const newPitchData: GeneratedPitch = { 
+        input, 
+        style, 
+        pitch: pitchText,
+        userId: user.name,
+        createdAt: new Date().toISOString()
+      };
       
-      // Save pitch using pitch provider
-      const savedPitch = await dataProvider.pitch.savePitch(newPitch);
-      
-      // Update state
+      const savedPitch = await provider.pitch.savePitch(newPitchData);
       setGeneratedPitch(savedPitch);
-      setPitchHistory(prev => [savedPitch, ...prev]);
       
-      // Deduct credits
-      const newCredits = await dataProvider.credits.deductCredits(user.name!, 1);
+      // Update history
+      const history = await provider.pitch.getPitchHistory(user.name);
+      setPitchHistory(history);
+      
+      // Deduct credit
+      const newCredits = await provider.credits.deductCredits(user.name, 1);
       setCredits(newCredits);
       
     } catch (err: any) {
@@ -157,16 +138,15 @@ export default function AppWithDataProvider() {
 
   const handleAnalyzePitch = async (pitchToAnalyze: string) => {
     if (!user || credits <= 0) return;
-    
     setIsAnalyzing(true);
     setError(null);
     setPitchAnalysis(null);
 
     try {
-      const analysisText = await dataProvider.ai.analyzePitch(pitchToAnalyze);
+      const analysisText = await provider.ai.analyzePitch(pitchToAnalyze);
       setPitchAnalysis(analysisText);
       
-      const newCredits = await dataProvider.credits.deductCredits(user.name!, 1);
+      const newCredits = await provider.credits.deductCredits(user.name, 1);
       setCredits(newCredits);
     } catch (err: any) {
       setError(err.message || 'Failed to analyze pitch');
@@ -177,16 +157,15 @@ export default function AppWithDataProvider() {
 
   const handleSuggestMarketing = async (originalInput: string) => {
     if (!user || credits <= 0) return;
-    
     setIsSuggestingMarketing(true);
     setError(null);
     setMarketingSuggestions(null);
 
     try {
-      const suggestionsText = await dataProvider.ai.generateMarketingSuggestions(originalInput);
+      const suggestionsText = await provider.ai.generateMarketingSuggestions(originalInput);
       setMarketingSuggestions(suggestionsText);
       
-      const newCredits = await dataProvider.credits.deductCredits(user.name!, 1);
+      const newCredits = await provider.credits.deductCredits(user.name, 1);
       setCredits(newCredits);
     } catch (err: any) {
       setError(err.message || 'Failed to generate marketing suggestions');
@@ -197,16 +176,10 @@ export default function AppWithDataProvider() {
 
   const addCredits = async (amount: number) => {
     if (!user) return;
-    
-    try {
-      const newCredits = await dataProvider.credits.addCredits(user.name!, amount);
-      setCredits(newCredits);
-    } catch (err: any) {
-      setError(err.message || 'Failed to add credits');
-    }
+    const newCredits = await provider.credits.addCredits(user.name, amount);
+    setCredits(newCredits);
   };
 
-  // Rest of the component remains the same...
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen text-gray-800 dark:text-white font-sans transition-colors duration-300 flex flex-col">
       <div className="absolute top-0 left-0 w-full h-full bg-cover bg-center opacity-10" style={{backgroundImage: "url('https://www.transparenttextures.com/patterns/cubes.png')"}}></div>

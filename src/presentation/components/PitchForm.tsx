@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { PitchFormProps } from '../types';
-import { PITCH_STYLES, PitchStyle } from '../utils/helpers';
+import { PitchFormProps } from '../../domain/types';
+import { PITCH_STYLES, PitchStyle } from '../../shared/utils/helpers';
 
 const PitchForm: React.FC<PitchFormProps> = ({ credits, onGenerate, isLoading }) => {
   const [input, setInput] = useState('');

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ViewPitchModalProps } from '../types';
+import { ViewPitchModalProps } from '../../domain/types';
 
 const ViewPitchModal: React.FC<ViewPitchModalProps> = ({ pitch, onClose }) => {
   if (!pitch) return null;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { HeaderProps } from '../types';
+import { HeaderProps } from '../../domain/types';
 import ThemeToggle from './ThemeToggle';
 
 const Header: React.FC<HeaderProps> = ({ user, credits, onLogin, onLogout, theme, toggleTheme }) => (

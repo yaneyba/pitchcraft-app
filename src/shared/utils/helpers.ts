@@ -1,5 +1,5 @@
 import React from 'react';
-import { Theme } from '../types';
+import { Theme } from '../../domain/types';
 
 /**
  * Gets the initial theme from localStorage or system preference

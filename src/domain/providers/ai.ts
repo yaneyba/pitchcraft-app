@@ -1,5 +1,5 @@
 import { IAIProvider } from './types';
-import { generatePitch, analyzePitch, generateMarketingSuggestions } from '../utils/api';
+import { generatePitch, analyzePitch, generateMarketingSuggestions } from '../../infrastructure/api/gemini';
 
 export class GeminiAIProvider implements IAIProvider {
   async generatePitch(input: string, style: string): Promise<string> {

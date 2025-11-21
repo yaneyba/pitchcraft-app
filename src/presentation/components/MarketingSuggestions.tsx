@@ -1,6 +1,6 @@
 import React from 'react';
-import { MarketingSuggestionsProps } from '../types';
-import { formatMarkdownText } from '../utils/helpers';
+import { MarketingSuggestionsProps } from '../../domain/types';
+import { formatMarkdownText } from '../../shared/utils/helpers';
 
 const MarketingSuggestions: React.FC<MarketingSuggestionsProps> = ({ suggestions }) => {
   const formattedSuggestions = formatMarkdownText(suggestions);

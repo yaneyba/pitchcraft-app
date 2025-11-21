@@ -2,9 +2,9 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
-import { DataProviderFactory } from './providers/DataProviderFactory'
-import { DataProviderProvider } from './providers/hooks/useDataProvider'
-import { ProviderType } from './providers/types'
+import { DataProviderFactory } from '../domain/providers/DataProviderFactory'
+import { DataProviderProvider } from '../application/hooks/useDataProvider'
+import { ProviderType } from '../domain/providers/types'
 
 // Initialize the DataProvider with real API and LocalStorage
 const dataProvider = DataProviderFactory.createProvider({

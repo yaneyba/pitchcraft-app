@@ -1,6 +1,6 @@
 import React from 'react';
-import { PitchAnalysisProps } from '../types';
-import { formatMarkdownText } from '../utils/helpers';
+import { PitchAnalysisProps } from '../../domain/types';
+import { formatMarkdownText } from '../../shared/utils/helpers';
 
 const PitchAnalysis: React.FC<PitchAnalysisProps> = ({ analysis }) => {
   const formattedAnalysis = formatMarkdownText(analysis);
