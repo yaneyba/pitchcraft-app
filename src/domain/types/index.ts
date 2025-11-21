@@ -68,6 +68,7 @@ export interface DashboardProps {
   history: GeneratedPitch[];
   onBuyCredits: (amount: number) => void;
   onViewPitch: (pitch: GeneratedPitch) => void;
+  onDeletePitch: (pitchId: string) => void;
 }
 
 export interface ApiErrorProps {

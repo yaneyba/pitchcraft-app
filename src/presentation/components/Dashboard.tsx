@@ -1,7 +1,7 @@
 import React from 'react';
 import { DashboardProps } from '../../domain/types';
 
-const Dashboard: React.FC<DashboardProps> = ({ user, credits, history, onBuyCredits, onViewPitch }) => (
+const Dashboard: React.FC<DashboardProps> = ({ user, credits, history, onBuyCredits, onViewPitch, onDeletePitch }) => (
   <div className="w-full max-w-6xl p-4 sm:p-8 bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl animate-fade-in">
     <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Welcome back, {user?.name}!</h2>
 
@@ -54,9 +54,24 @@ const Dashboard: React.FC<DashboardProps> = ({ user, credits, history, onBuyCred
               <p className="font-semibold text-indigo-600 dark:text-indigo-400">{item.style}</p>
               <p className="text-gray-500 dark:text-gray-400 text-sm truncate mt-1">Input: {item.input}</p>
             </div>
-            <button onClick={() => onViewPitch(item)} className="bg-gray-200 dark:bg-gray-700 hover:bg-indigo-500 dark:hover:bg-indigo-600 text-gray-800 dark:text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm mt-3 sm:mt-0 w-full sm:w-auto">
-              View Pitch
-            </button>
+            <div className="flex gap-2 mt-3 sm:mt-0 w-full sm:w-auto">
+              <button onClick={() => onViewPitch(item)} className="flex-1 sm:flex-none bg-gray-200 dark:bg-gray-700 hover:bg-indigo-500 dark:hover:bg-indigo-600 text-gray-800 dark:text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm">
+                View Pitch
+              </button>
+              <button 
+                onClick={() => {
+                  if (window.confirm('Are you sure you want to delete this pitch?')) {
+                    onDeletePitch(item.id!);
+                  }
+                }}
+                className="bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 font-semibold py-2 px-4 rounded-lg transition-colors text-sm"
+                title="Delete pitch"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
           </div>
         )) : (
           <p className="text-gray-500 dark:text-gray-500 text-center py-12">You haven't generated any pitches yet.</p>

@@ -180,6 +180,18 @@ export default function App() {
     setCredits(newCredits);
   };
 
+  const handleDeletePitch = async (pitchId: string) => {
+    if (!user) return;
+    try {
+      await provider.pitch.deletePitch(pitchId);
+      // Refresh history
+      const history = await provider.pitch.getPitchHistory(user.name);
+      setPitchHistory(history);
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete pitch');
+    }
+  };
+
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen text-gray-800 dark:text-white font-sans transition-colors duration-300 flex flex-col">
       <div className="absolute top-0 left-0 w-full h-full bg-cover bg-center opacity-10" style={{backgroundImage: "url('https://www.transparenttextures.com/patterns/cubes.png')"}}></div>
@@ -234,6 +246,7 @@ export default function App() {
                 history={pitchHistory} 
                 onBuyCredits={addCredits}
                 onViewPitch={(pitch) => setSelectedPitch(pitch)}
+                onDeletePitch={handleDeletePitch}
               />
             )}
           </>
