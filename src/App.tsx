@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { User, GeneratedPitch } from './types';
-import { generatePitch, analyzePitch, generateMarketingSuggestions } from './utils/api';
+import { useDataProvider } from './providers/hooks/useDataProvider';
 
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -14,6 +14,7 @@ import ViewPitchModal from './components/ViewPitchModal';
 import ApiError from './components/ApiError';
 
 export default function App() {
+  const provider = useDataProvider();
   const [user, setUser] = useState<User | null>(null);
   const [credits, setCredits] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -27,6 +28,22 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [selectedPitch, setSelectedPitch] = useState<GeneratedPitch | null>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+
+  // Load initial data
+  useEffect(() => {
+    const loadData = async () => {
+      const currentUser = await provider.user.getCurrentUser();
+      setUser(currentUser);
+
+      if (currentUser) {
+        const userCredits = await provider.credits.getCredits(currentUser.name);
+        setCredits(userCredits);
+        const history = await provider.pitch.getPitchHistory(currentUser.name);
+        setPitchHistory(history);
+      }
+    };
+    loadData();
+  }, [provider]);
 
   // Effect to set theme from localStorage on initial load
   useEffect(() => {
@@ -55,21 +72,29 @@ export default function App() {
     setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
   };
 
-  const handleLogin = () => {
-    setUser({ name: 'Demo User' });
-    setCredits(5);
+  const handleLogin = async () => {
+    const newUser = await provider.user.loginUser({ name: 'Demo User' });
+    setUser(newUser);
+    const userCredits = await provider.credits.getCredits(newUser.name);
+    setCredits(userCredits);
+    const history = await provider.pitch.getPitchHistory(newUser.name);
+    setPitchHistory(history);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await provider.user.logoutUser();
     setUser(null);
     setCredits(0);
     setGeneratedPitch(null);
     setPitchAnalysis(null);
     setMarketingSuggestions(null);
+    setPitchHistory([]);
     setActiveView('generator');
   };
 
   const handleGeneratePitch = async (input: string, style: string) => {
+    if (!user) return;
+    
     setIsLoading(true);
     setError(null);
     setGeneratedPitch(null);
@@ -77,11 +102,33 @@ export default function App() {
     setMarketingSuggestions(null);
 
     try {
-      const pitchText = await generatePitch(input, style);
-      const newPitchData = { input, style, pitch: pitchText };
-      setGeneratedPitch(newPitchData);
-      setPitchHistory(prev => [newPitchData, ...prev]);
-      setCredits(prev => prev - 1);
+      // Check credits first
+      const currentCredits = await provider.credits.getCredits(user.name);
+      if (currentCredits < 1) {
+        throw new Error('Insufficient credits');
+      }
+
+      const pitchText = await provider.ai.generatePitch(input, style);
+      
+      const newPitchData: GeneratedPitch = { 
+        input, 
+        style, 
+        pitch: pitchText,
+        userId: user.name,
+        createdAt: new Date().toISOString()
+      };
+      
+      const savedPitch = await provider.pitch.savePitch(newPitchData);
+      setGeneratedPitch(savedPitch);
+      
+      // Update history
+      const history = await provider.pitch.getPitchHistory(user.name);
+      setPitchHistory(history);
+      
+      // Deduct credit
+      const newCredits = await provider.credits.deductCredits(user.name, 1);
+      setCredits(newCredits);
+      
     } catch (err: any) {
       setError(err.message || 'Failed to generate pitch');
     } finally {
@@ -90,15 +137,17 @@ export default function App() {
   };
 
   const handleAnalyzePitch = async (pitchToAnalyze: string) => {
-    if (credits <= 0) return;
+    if (!user || credits <= 0) return;
     setIsAnalyzing(true);
     setError(null);
     setPitchAnalysis(null);
 
     try {
-      const analysisText = await analyzePitch(pitchToAnalyze);
+      const analysisText = await provider.ai.analyzePitch(pitchToAnalyze);
       setPitchAnalysis(analysisText);
-      setCredits(prev => prev - 1);
+      
+      const newCredits = await provider.credits.deductCredits(user.name, 1);
+      setCredits(newCredits);
     } catch (err: any) {
       setError(err.message || 'Failed to analyze pitch');
     } finally {
@@ -107,15 +156,17 @@ export default function App() {
   };
 
   const handleSuggestMarketing = async (originalInput: string) => {
-    if (credits <= 0) return;
+    if (!user || credits <= 0) return;
     setIsSuggestingMarketing(true);
     setError(null);
     setMarketingSuggestions(null);
 
     try {
-      const suggestionsText = await generateMarketingSuggestions(originalInput);
+      const suggestionsText = await provider.ai.generateMarketingSuggestions(originalInput);
       setMarketingSuggestions(suggestionsText);
-      setCredits(prev => prev - 1);
+      
+      const newCredits = await provider.credits.deductCredits(user.name, 1);
+      setCredits(newCredits);
     } catch (err: any) {
       setError(err.message || 'Failed to generate marketing suggestions');
     } finally {
@@ -123,8 +174,10 @@ export default function App() {
     }
   };
 
-  const addCredits = (amount: number) => {
-    setCredits(prev => prev + amount);
+  const addCredits = async (amount: number) => {
+    if (!user) return;
+    const newCredits = await provider.credits.addCredits(user.name, amount);
+    setCredits(newCredits);
   };
 
   return (
