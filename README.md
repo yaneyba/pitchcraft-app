@@ -4,15 +4,16 @@ A modern React application that uses AI to generate compelling startup pitches, 
 
 ## 🚀 Features
 
-- **AI-Powered Pitch Generation**: Generate tailored pitches using Gemini AI
+- **AI-Powered Pitch Generation**: Generate tailored pitches using Gemini AI with Google Search Grounding
+- **URL Context Extraction**: Automatically extract context from URLs to enhance pitch quality
 - **Multiple Pitch Styles**: Elevator pitches, investor decks, social media blurbs, and more
 - **Pitch Analysis**: Get feedback from an AI venture capitalist
 - **Marketing Suggestions**: Receive creative slogans and marketing angles
+- **Pitch Export**: Download your pitch history as JSON for backup
 - **User Dashboard**: View pitch history and manage credits
 - **Dark/Light Theme**: Toggle between themes with system preference detection
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
-- **Sticky Footer Layout**: Professional UI with proper footer positioning
-- **DataProvider Architecture**: Centralized data flow control with swappable implementations
+- **Layered Architecture**: Clean separation of concerns with presentation, application, domain, infrastructure, and shared layers
 
 ## 🛠️ Tech Stack
 
@@ -26,47 +27,57 @@ A modern React application that uses AI to generate compelling startup pitches, 
 
 ## 📁 Project Structure
 
+The project follows a **clean layered architecture** for better organization and maintainability:
+
 ```
 pitchcraft-app/
 ├── src/
-│   ├── components/          # React components
-│   │   ├── Header.tsx
-│   │   ├── Footer.tsx
-│   │   ├── LandingPage.tsx
-│   │   ├── ThemeToggle.tsx
-│   │   └── ...
-│   ├── providers/          # DataProvider architecture
-│   │   ├── factory/        # DataProvider factory
-│   │   │   └── DataProviderFactory.ts
-│   │   ├── implementations/  # Provider implementations
-│   │   │   ├── UserProvider.ts
-│   │   │   ├── PitchProvider.ts
-│   │   │   ├── CreditsProvider.ts
-│   │   │   ├── AIProvider.ts
-│   │   │   └── StorageProvider.ts
-│   │   ├── hooks/          # React hooks for providers
-│   │   │   ├── useDataProvider.ts
-│   │   │   └── useProviders.ts
-│   │   └── types/          # Provider type definitions
+│   ├── presentation/           # Presentation Layer (UI)
+│   │   ├── components/        # React components
+│   │   │   ├── Header.tsx
+│   │   │   ├── Footer.tsx
+│   │   │   ├── LandingPage.tsx
+│   │   │   ├── PitchForm.tsx
+│   │   │   ├── PitchResult.tsx
+│   │   │   ├── Dashboard.tsx
+│   │   │   └── ...
+│   │   ├── App.tsx            # Main application component
+│   │   ├── main.tsx           # Application entry point
+│   │   └── index.css          # Global styles
+│   │
+│   ├── application/           # Application Layer
+│   │   └── hooks/            # Custom React hooks
+│   │       └── useDataProvider.tsx
+│   │
+│   ├── domain/               # Domain Layer (Business Logic)
+│   │   ├── providers/        # Data providers
+│   │   │   ├── DataProvider.ts
+│   │   │   ├── DataProviderFactory.ts
+│   │   │   ├── user.ts
+│   │   │   ├── pitch.ts
+│   │   │   ├── credits.ts
+│   │   │   ├── ai.ts
+│   │   │   ├── storage.ts
+│   │   │   └── types.ts
+│   │   └── types/            # Domain type definitions
 │   │       └── index.ts
-│   ├── hooks/              # Custom React hooks
-│   │   └── useTheme.ts
-│   ├── types/              # TypeScript type definitions
-│   │   └── index.ts
-│   ├── utils/              # Utility functions
-│   │   ├── api.ts          # API calls with env variables
-│   │   └── helpers.ts      # Helper functions
-│   ├── App.tsx             # Main application component
-│   ├── main.tsx            # Application entry point
-│   └── index.css           # Global styles
-├── public/                 # Static assets
-├── .env                    # Environment variables
-├── index.html              # HTML template
-├── package.json            # Dependencies and scripts
-├── vite.config.ts          # Vite configuration
-├── tailwind.config.js      # Tailwind CSS configuration
-├── tsconfig.json           # TypeScript configuration
-└── README.md               # This file
+│   │
+│   ├── infrastructure/       # Infrastructure Layer
+│   │   └── api/             # External API integrations
+│   │       └── gemini.ts    # Gemini AI API client
+│   │
+│   └── shared/              # Shared utilities
+│       └── utils/
+│           └── helpers.ts   # Helper functions
+│
+├── public/                  # Static assets
+├── .env                     # Environment variables
+├── index.html               # HTML template
+├── package.json             # Dependencies and scripts
+├── vite.config.ts           # Vite configuration
+├── tailwind.config.js       # Tailwind CSS configuration
+├── tsconfig.json            # TypeScript configuration
+└── README.md                # This file
 ```
 
 ## 🚀 Getting Started
@@ -138,8 +149,8 @@ The app uses environment variables for secure configuration. Create a `.env` fil
 # Required: Your Google Gemini AI API key
 VITE_GEMINI_API_KEY=your_actual_api_key_here
 
-# Optional: Custom Gemini API endpoint (defaults to Google's endpoint)
-VITE_GEMINI_API_URL=https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent
+# Required: Gemini API endpoint (using Gemini 2.0 Flash)
+VITE_GEMINI_API_URL=https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent
 ```
 
 ### DataProvider Configuration
@@ -171,30 +182,41 @@ theme: {
 
 ## 🧩 Architecture Overview
 
-### DataProvider Pattern
+### Layered Architecture
 
-The app implements a DataProvider architecture for centralized data management:
+The app follows **clean architecture principles** with clear separation of concerns:
 
-- **DataProviderFactory**: Creates and configures provider instances
-- **Provider Implementations**: Separate providers for User, Pitch, Credits, AI, and Storage
-- **React Integration**: Custom hooks (`useDataProvider`, `useProviders`) for component integration
-- **Flexible Configuration**: Easily switch between Local/Memory/API storage modes
+**Presentation Layer** (`src/presentation/`)
+- React components and UI logic
+- Entry point (`main.tsx`) and main app component
+- Handles user interaction and display
 
-### Component Architecture
+**Application Layer** (`src/application/`)
+- Custom hooks that bridge UI and domain logic
+- `useDataProvider` hook for accessing data providers
 
-- **App.tsx**: Main container with sticky footer layout
-- **Components**: Modular, reusable UI components
-- **Hooks**: Custom React hooks for shared logic
-- **Providers**: Data abstraction layer with multiple implementations
-- **Utils**: API calls with environment variable configuration
-- **Types**: Comprehensive TypeScript interfaces
+**Domain Layer** (`src/domain/`)
+- Business logic and data providers
+- DataProvider pattern with Factory design
+- Type definitions and domain models
+- Providers: User, Pitch, Credits, AI, Storage
+
+**Infrastructure Layer** (`src/infrastructure/`)
+- External service integrations
+- Gemini AI API client with Google Search Grounding
+- Environment variable configuration
+
+**Shared Layer** (`src/shared/`)
+- Common utilities and helpers
+- Theme management and markdown formatting
 
 ### Key Benefits
 
-- **Separation of Concerns**: Business logic separated from UI components
-- **Testability**: Mock providers available for testing
-- **Scalability**: Easy to add new data sources or providers
-- **Configuration-Driven**: Switch implementations without code changes
+- **Separation of Concerns**: Each layer has a specific responsibility
+- **Testability**: Layers can be tested independently with mock implementations
+- **Scalability**: Easy to add new features to the appropriate layer
+- **Maintainability**: Clear structure makes code easier to navigate and modify
+- **Flexibility**: Swap implementations without affecting other layers
 
 ## 📝 Available Scripts
 
@@ -217,6 +239,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔮 Future Enhancements
 
+- [ ] Delete individual pitches from history
 - [ ] Database integration via DataProvider architecture
 - [ ] Real-time collaboration features
 - [ ] Advanced pitch analytics and A/B testing
