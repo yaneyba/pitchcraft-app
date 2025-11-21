@@ -72,7 +72,10 @@ export const callGeminiApi = async (systemPrompt: string, userQuery: string, too
  * Generates a pitch using the Gemini API
  */
 export const generatePitch = async (input: string, style: string): Promise<string> => {
-  const systemPrompt = "You are PitchCraft AI, a professional startup copywriter and marketing expert. Your goal is to generate a compelling, concise, and persuasive pitch based on the user's input. Adapt your tone and structure perfectly to the requested pitch style. If the user provides a URL, use the Google Search tool to visit the page and extract relevant context to inform your pitch.";
+  const systemPrompt = `You are PitchCraft AI, a professional startup copywriter and marketing expert. Generate a compelling, concise, and persuasive pitch based on the user's input. Adapt your tone and structure perfectly to the requested pitch style.
+
+IMPORTANT: Do not explain what you are going to do. Do not describe your process. Simply generate the pitch directly. If a URL is provided, research it first, then write the pitch based on what you learned.`;
+  
   const userQuery = `Generate a "${style}" pitch for the following app: [${input}]. Focus on its unique value proposition, core features, and target audience.`;
   
   // Check if input contains a URL
